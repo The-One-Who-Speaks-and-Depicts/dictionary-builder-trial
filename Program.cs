@@ -35,14 +35,27 @@ namespace DictonaryFormationDummy
                     .SelectMany(t => t.clauses)
                     .SelectMany(c => c.realizations)
                     .ToList();
-                List<string> lemmata = realizationsforDictionary
+                Console.WriteLine("Print the number of lemmatization way you prefer: with custom lemmatizer(1), or token-as-lemma(0)?");
+                List<DictionaryUnit> finalDictionary = new();
+                if (Console.ReadLine() == "1")
+                {
+                    List<string> lemmata = realizationsforDictionary
                     .SelectMany(r => r.realizationFields.Where(t => t.ContainsKey("Lemma"))
                     .SelectMany(t => t["Lemma"])
                     .Select(v => v.name))
                     .Distinct()
                     .ToList();
-                List<DictionaryUnit> finalDictionary = new();
-                lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.realizationFields.Where(t => t.ContainsKey("Lemma")).SelectMany(t => t["Lemma"]).Any(v => v.name == lemma)).ToList())));
+                    lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.realizationFields.Where(t => t.ContainsKey("Lemma")).SelectMany(t => t["Lemma"]).Any(v => v.name == lemma)).ToList())));
+                }
+                else
+                {
+                    List<string> lemmata = realizationsforDictionary
+                    .Select(r => r.lexemeTwo)
+                    .Distinct()
+                    .ToList();
+                    lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.lexemeTwo == lemma).ToList())));
+
+                }
                 finalDictionary = finalDictionary.OrderBy(unit => unit.lemma).ToList();
                 // test run
                 for (int u = 0; u < finalDictionary.Count; u++)
@@ -51,7 +64,7 @@ namespace DictonaryFormationDummy
                     {
                         Directory.CreateDirectory(Path.Combine(path, "dictionary"));
                     }    
-                    File.WriteAllText(Path.Combine(path, "dictionary", finalDictionary[u].lemma + ".json"), JsonConvert.SerializeObject(finalDictionary[u]));
+                    File.WriteAllText(Path.Combine(path, "dictionary", u.ToString() + ".json"), JsonConvert.SerializeObject(finalDictionary[u]));
                 }
             }
             Console.WriteLine("Finished! Press any key to exit...");

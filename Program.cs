@@ -25,7 +25,7 @@ namespace DictonaryFormationDummy
                 documents = documents.Where(d => d.documentMetaData.Any(f => f.ContainsKey("Tagged") && f["Tagged"].Any(t => t.name != "Not_tagged"))).ToList();
                 for (int d = 0; d < documents.Count; d++)
                 {
-                    Console.WriteLine("{0} - {1}", d.ToString(), documents[d].documentName);
+                    Console.WriteLine($"{d.ToString()} - {documents[d].documentName}");
                 }
                 Console.WriteLine("Print numbers of documents you want to make the dictionary from. Separate by spaces");
                 string userChoice = Console.ReadLine();
@@ -35,7 +35,7 @@ namespace DictonaryFormationDummy
                     .SelectMany(t => t.clauses)
                     .SelectMany(c => c.realizations)
                     .ToList();
-                Console.WriteLine("Print the number of lemmatization way you prefer: with custom lemmatizer(1), or token-as-lemma(0)?");
+                Console.WriteLine("Print the number of lemmatization way you prefer: with UD lemmatizer{2 or any other key}, custom lemmatizer(1), or token-as-lemma(0)?");
                 List<DictionaryUnit> finalDictionary = new();
                 if (Console.ReadLine() == "1")
                 {
@@ -47,7 +47,7 @@ namespace DictonaryFormationDummy
                     .ToList();
                     lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.realizationFields.Where(t => t.ContainsKey("Lemma")).SelectMany(t => t["Lemma"]).Any(v => v.name == lemma)).ToList())));
                 }
-                else
+                else if (Console.ReadLine() == "0")
                 {
                     List<string> lemmata = realizationsforDictionary
                     .Select(r => r.lexemeTwo)
@@ -55,6 +55,21 @@ namespace DictonaryFormationDummy
                     .ToList();
                     lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.lexemeTwo == lemma).ToList())));
 
+                }
+                else
+                {
+                    List<string> realizationsForLemmatization = realizationsforDictionary
+                        .OrderBy(r => r.documentID)
+                        .ThenBy(r => r.textID)
+                        .ThenBy(r => r.clauseID)
+                        .ThenBy(r => r.realizationID)
+                        .Select(r => r.lexemeTwo)
+                        .ToList();
+                    string transferredRealizations = String.Join(' ', realizationsForLemmatization);
+                    File.WriteAllText(Path.Combine(path, "temp.txt"), transferredRealizations);
+                    // call TurkuNLP
+                    // collect from .conllu
+                    
                 }
                 finalDictionary = finalDictionary.OrderBy(unit => unit.lemma).ToList();
                 // test run

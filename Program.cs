@@ -35,7 +35,7 @@ namespace DictonaryFormationDummy
                     .SelectMany(t => t.clauses)
                     .SelectMany(c => c.realizations)
                     .ToList();
-                Console.WriteLine("Print the number of lemmatization way you prefer: with UD lemmatizer{2 or any other key}, custom lemmatizer(1), or token-as-lemma(0)?");
+                Console.WriteLine("Print the number of lemmatization way you prefer: with UD lemmatizer(2 or any other key), custom lemmatizer(1), or token-as-lemma(0)?");
                 List<DictionaryUnit> finalDictionary = new();
                 if (Console.ReadLine() == "1")
                 {
@@ -67,7 +67,8 @@ namespace DictonaryFormationDummy
                         .ToList();
                     string transferredRealizations = String.Join(' ', realizationsForLemmatization);
                     File.WriteAllText(Path.Combine(path, "temp.txt"), transferredRealizations);
-                    // call TurkuNLP
+                    Console.WriteLine("Use TurkuNLP on the file temp.txt in database directory, then press any key");
+                    Console.ReadKey();
                     // collect from .conllu
                     
                 }

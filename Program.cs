@@ -59,10 +59,10 @@ namespace DictonaryFormationDummy
                 else
                 {
                     List<string> realizationsForLemmatization = realizationsforDictionary
-                        .OrderBy(r => r.documentID)
-                        .ThenBy(r => r.textID)
-                        .ThenBy(r => r.clauseID)
-                        .ThenBy(r => r.realizationID)
+                        .OrderBy(r => Convert.ToInt32(r.documentID))
+                        .ThenBy(r => Convert.ToInt32(r.textID))
+                        .ThenBy(r => Convert.ToInt32(r.clauseID))
+                        .ThenBy(r => Convert.ToInt32(r.realizationID))
                         .Select(r => r.lexemeTwo)
                         .ToList();
                     string transferredRealizations = String.Join(' ', realizationsForLemmatization);

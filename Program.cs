@@ -37,7 +37,8 @@ namespace DictonaryFormationDummy
                     .ToList();
                 Console.WriteLine("Print the number of lemmatization way you prefer: with UD lemmatizer(2 or any other key), custom lemmatizer(1), or token-as-lemma(0)?");
                 List<DictionaryUnit> finalDictionary = new();
-                if (Console.ReadLine() == "1")
+                string decision = Console.ReadLine();
+                if (decision == "1")
                 {
                     List<string> lemmata = realizationsforDictionary
                     .SelectMany(r => r.realizationFields.Where(t => t.ContainsKey("Lemma"))
@@ -47,7 +48,7 @@ namespace DictonaryFormationDummy
                     .ToList();
                     lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, realizationsforDictionary.Where(r => r.realizationFields.Where(t => t.ContainsKey("Lemma")).SelectMany(t => t["Lemma"]).Any(v => v.name == lemma)).ToList())));
                 }
-                else if (Console.ReadLine() == "0")
+                else if (decision == "0")
                 {
                     List<string> lemmata = realizationsforDictionary
                     .Select(r => r.lexemeTwo)

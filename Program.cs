@@ -4,6 +4,7 @@ using CorpusDraftCSharp;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace DictonaryFormationDummy
 {
@@ -70,8 +71,27 @@ namespace DictonaryFormationDummy
                     File.WriteAllText(Path.Combine(path, "temp.txt"), transferredRealizations);
                     Console.WriteLine("Use TurkuNLP on the file temp.txt in database directory, then press any key");
                     Console.ReadKey();
-                    // collect from .conllu
-                    
+                    var conlluRetrieved = File.ReadAllText(Path.Combine(path, "temp.conllu")).Split('\n').ToList().Where(s => s != "" && s != "\n" && !s.StartsWith('#')).ToList();
+                    List<string> lemmata = new();
+                    conlluRetrieved.ForEach(s => lemmata.Add(Regex.Split(s, @"\s")[2]));
+                    List<Realization> sortedRealizations = realizationsforDictionary
+                        .OrderBy(r => Convert.ToInt32(r.documentID))
+                        .ThenBy(r => Convert.ToInt32(r.textID))
+                        .ThenBy(r => Convert.ToInt32(r.clauseID))
+                        .ThenBy(r => Convert.ToInt32(r.realizationID))
+                        .ToList();                    
+                    for (int i = 0; i < sortedRealizations.Count; i++)
+                    {
+                        if (sortedRealizations[i].realizationFields == null)
+                        {
+                            sortedRealizations[i].realizationFields = new();
+                        }
+                        sortedRealizations[i].realizationFields.Add(new());
+                        sortedRealizations[i].realizationFields[sortedRealizations[i].realizationFields.Count - 1]["Lemma_UD"] = new() { new (lemmata[i]) };
+
+                    }
+                    lemmata = lemmata.Distinct().ToList();
+                    lemmata.ForEach(lemma => finalDictionary.Add(new DictionaryUnit(lemma, sortedRealizations.Where(r => r.realizationFields.Where(t => t.ContainsKey("Lemma_UD")).SelectMany(t => t["Lemma_UD"]).Any(v => v.name == lemma)).ToList())));                    
                 }
                 finalDictionary = finalDictionary.OrderBy(unit => unit.lemma).ToList();
                 // test run
